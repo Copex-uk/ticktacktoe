@@ -1,5 +1,5 @@
 //
-// "Noughts and Crosses" AKA "Tic Tac Toe"
+// "git "
 //
 
 package main
@@ -168,7 +168,7 @@ func main() {
 	// waste some time printing / - \ for no reason :-)
 
 	fmt.Print("\033c")
-	fmt.Println("Welcome to Tic Tac Toe ! ( Version ", vers, ")")
+	fmt.Printf("Welcome to Tic Tac Toe ! ( Version  %04d)\n", vers)
 	fmt.Println()
 	fmt.Print("Setting up the game ....")
 
