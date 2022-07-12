@@ -16,6 +16,8 @@ import (
 
 const vers int = 25
 
+var numberofgames int = 1
+
 // Start of functions
 
 func wait(s time.Duration) {
@@ -39,7 +41,7 @@ func scoreboard(ply1 string, ply2 string, score [3]int) {
 func drawboard(board []string) {
 	// draw the board
 	fmt.Print("\033c")
-	fmt.Println("Welcome to Tic Tac Toe ! ( Version 00.", vers, ")")
+	fmt.Printf("Welcome to Tic Tac Toe ! ( Version  %04d)\n", vers)
 	fmt.Print("\n\n")
 	fmt.Printf(" %s| %s| %s\n", board[1], board[2], board[3])
 	fmt.Printf("__|__|__\n")
@@ -131,7 +133,8 @@ func checkdraw(checkboard []string) bool {
 
 }
 
-func boardtest() int {
+func gophermove() int {
+
 	// check computer player and generate move
 
 	wait(50)
@@ -140,14 +143,27 @@ func boardtest() int {
 
 }
 
+func canwin(plmove string) int {
+	// mgroups := [25]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 4, 7, 2, 5, 8, 3, 6, 9, 1, 5, 9, 3, 5, 7}
+
+	return 0
+
+}
+
+func bestmove(plmove string) int {
+	println(plmove)
+	return 0
+}
+
 func playagain() bool {
 	// check if there is another game
 	var playagain string
-	fmt.Print("\nWould you Like to Play again? (y/n)")
+	fmt.Printf("\n(Games Played %d) Would you Like to Play again? (y/n) ->", numberofgames)
 	fmt.Scanf("%s", &playagain)
 	if playagain != "y" {
 		return false
 	} else {
+		numberofgames = numberofgames + 1
 		return true
 	}
 }
@@ -220,8 +236,15 @@ func main() {
 		}
 
 		if cplname == computer {
-			value = boardtest()
-			fmt.Println(board)
+
+			canwin := canwin(plmove)
+
+			if canwin != 0 {
+				value = canwin
+				break
+			}
+
+			value = gophermove()
 		}
 
 		if error == nil {
