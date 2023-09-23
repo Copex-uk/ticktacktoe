@@ -5,8 +5,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -14,7 +16,7 @@ import (
 
 // declair Constants
 
-const vers int = 25
+const vers int = 28
 
 var numberofgames int = 1
 
@@ -24,11 +26,11 @@ func wait(s time.Duration) {
 
 	time.Sleep(s * time.Millisecond)
 }
-func scoreboard(ply1 string, ply2 string, score [3]int) {
+func scoreboard(ply1 string, ply2 string, score [4]int) {
 	// scoreboard
 	fmt.Print("\n\n")
 	fmt.Printf("+%s+\n", strings.Repeat("-", 45))
-	fmt.Printf("| %-20s | %-20s |\n", "Player", "Score")
+	fmt.Printf("| %-20s | %-20s |\n", "Player", "Score Game["+strconv.Itoa(score[3])+"]")
 	fmt.Printf("|%s|\n", strings.Repeat("-", 45))
 	fmt.Printf("| %-20s | %-20d |\n", ply1, score[0])
 	fmt.Printf("| %-20s | %-20d |\n", ply2, score[1])
@@ -143,29 +145,95 @@ func gophermove() int {
 
 }
 
-func canwin(plmove string) int {
-	// mgroups := [25]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 4, 7, 2, 5, 8, 3, 6, 9, 1, 5, 9, 3, 5, 7}
+func canwin(plmove string, checkboard []string) int {
 
-	return 0
+	// check if the computer player has 2 of 3 in a wining line and return the empty space to win
+	var oplayer string
 
-}
+	oplayer = ""
 
-func bestmove(plmove string) int {
-	println(plmove)
-	return 0
+	if plmove == "X" {
+		oplayer = "0"
+	} else {
+		oplayer = "X"
+	}
+
+	wins := [...]int{
+		0,
+		1, 2, 3,
+		4, 5, 6,
+		7, 8, 9,
+		1, 4, 7,
+		2, 5, 8,
+		3, 6, 9,
+		1, 5, 9,
+		3, 5, 7,
+	}
+
+	i := 1
+
+	check := [3]int{0, 0, 0}
+
+	// code below can be optmised --->
+
+	for {
+
+		if checkboard[wins[i]] == plmove && checkboard[wins[i]] != oplayer {
+			check[0] = 1
+		}
+
+		if checkboard[wins[i+1]] == plmove && checkboard[wins[i+1]] != oplayer {
+			check[1] = 1
+		}
+
+		if checkboard[wins[i+2]] == plmove && checkboard[wins[i+2]] != oplayer {
+			check[2] = 1
+		}
+
+		if check[0]+check[1]+check[2] == 2 {
+
+			if check[0] == 0 && checkboard[wins[i]] != plmove && checkboard[wins[i]] != oplayer {
+				return wins[i]
+			}
+
+			if check[1] == 0 && checkboard[wins[i+1]] != plmove && checkboard[wins[i+1]] != oplayer {
+				return wins[i+1]
+			}
+
+			if check[2] == 0 && checkboard[wins[i+2]] != plmove && checkboard[wins[i+2]] != oplayer {
+				return wins[i+2]
+			}
+
+		}
+		check[0] = 0
+		check[1] = 0
+		check[2] = 0
+
+		i = i + 3
+
+		if i >= len(wins) {
+			return 0
+		}
+	}
 }
 
 func playagain() bool {
 	// check if there is another game
-	var playagain string
+	//var playagain string
+	reader := bufio.NewReader(os.Stdin)
 	fmt.Printf("\n(Games Played %d) Would you Like to Play again? (y/n) ->", numberofgames)
-	fmt.Scanf("%s", &playagain)
-	if playagain != "y" {
-		return false
-	} else {
+	// fmt.Print("play again?")
+	//fmt.Scanf("%s", &playagain)
+	playagain, _ := reader.ReadString('\n')
+
+	fmt.Println(len(playagain))
+
+	if strings.TrimSpace(strings.ToLower(playagain)) == "y" {
 		numberofgames = numberofgames + 1
 		return true
 	}
+
+	return false
 }
 
 // Start of main game (maybe usefull to someone :-) ???
@@ -174,10 +242,10 @@ func main() {
 
 	var input, player1, player2 string
 	var pause time.Duration
-	var score [3]int
+	var score [4]int
 
 	pause = 35
-	score = [3]int{0, 0, 0}
+	score = [4]int{0, 0, 0, 0}
 
 	board := []string{"-", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
@@ -200,13 +268,17 @@ func main() {
 		fmt.Print("\b")
 	}
 
-	fmt.Print("\n\nPlayer one allways go's first (use gopher for cumputer player)\n\n")
+	fmt.Println()
+
+	//fmt.Print("\n\nPlayer one allways go's first (use gopher for cumputer player)\n\n")
 	// get palyers names
 	fmt.Print("Player 1, What is your Name ? ")
 	fmt.Scanf("%s", &player1)
 
 	fmt.Print("Player 2, What is your Name ? ")
 	fmt.Scanln(&player2)
+
+	fmt.Printf("Welcome, %s and %s! Let's play!\n", player1, player2)
 
 	// set current player name and current player move to track game, input set to 0 to stop game loop :-)
 	// if player one is set to gopher
@@ -237,14 +309,13 @@ func main() {
 
 		if cplname == computer {
 
-			canwin := canwin(plmove)
+			canwin := canwin(plmove, board)
 
-			if canwin != 0 {
+			if canwin == 0 {
+				value = gophermove()
+			} else {
 				value = canwin
-				break
 			}
-
-			value = gophermove()
 		}
 
 		if error == nil {
@@ -260,6 +331,8 @@ func main() {
 
 					if checkwin(board, plmove) {
 						fmt.Printf("Congratulations %s! You won this game.", cplname)
+
+						score[3] = score[3] + 1
 
 						if plmove == "X" {
 							score[0] = score[0] + 1
